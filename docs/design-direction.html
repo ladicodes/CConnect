@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect-Ask Design Direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Proposed design tokens (these become the app's Tailwind theme) ===== */
+:root{
+  --paper:#FBFAF7; --surface:#FFFFFF; --sunken:#F3F1EC; --line:#E6E2DA; --line-strong:#D6D1C6;
+  --ink:#1D1F22; --ink-2:#44474C; --muted:#5F6368;
+  --navy:#1A436E; --navy-ink:#12304F; --navy-tint:#E8EEF5;
+  --red:#D93C3C; --red-t:#B42F2F; --red-tint:#FBEAEA;
+  --yellow:#F7DB58; --yellow-t:#8A6A00; --yellow-tint:#FDF6D6;
+  --cyan:#4CA3DB; --cyan-t:#1C6698; --cyan-tint:#E6F2FA;
+  --magenta:#D63F9B; --magenta-t:#A62B78; --magenta-tint:#FAE8F3;
+  --green:#4EA869; --green-t:#2D7A47; --green-tint:#E7F4EB;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Figtree",ui-sans-serif,system-ui,sans-serif;
+  --r-sm:8px; --r-md:12px;
+}
+*{box-sizing:border-box;margin:0}
+body{background:#ECE9E2;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+img{display:block;max-width:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+/* ===== Board chrome (the document around the mockups) ===== */
+.board{max-width:1240px;margin:0 auto;padding:56px 24px 96px}
+.board>header{display:grid;gap:12px;margin-bottom:56px;max-width:760px}
+.eyebrow{font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.board h1{font-family:var(--display);font-size:clamp(36px,5vw,56px);line-height:1.02;letter-spacing:-.02em;font-weight:700}
+.board>header p{font-size:18px;color:var(--ink-2);max-width:62ch}
+section.part{margin-top:72px}
+.part>h2{font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+.part>.lede{color:var(--ink-2);max-width:70ch;margin:8px 0 28px}
+.num{font-family:var(--display);font-size:14px;color:var(--muted);font-weight:600;border:1px solid var(--line-strong);border-radius:99px;padding:2px 10px}
+.note{font-size:14px;color:var(--ink-2);max-width:68ch}
+.note b{color:var(--ink)}
+.sheet{background:var(--paper);border-radius:16px;padding:28px;border:1px solid #DDD8CE}
+
+/* ===== The ray tick: one logo ray, pointing at its label ===== */
+.tick{display:inline-block;width:18px;height:8px;background:var(--c,var(--navy));clip-path:polygon(0 0,100% 42%,100% 58%,0 100%);flex:none}
+.label{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+
+/* ===== Palette ===== */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.sw{border:1px solid var(--line);border-radius:var(--r-md);overflow:hidden;background:var(--surface)}
+.sw .chip{height:72px;display:flex;align-items:flex-end;padding:8px 10px;font-size:12px;font-weight:600}
+.sw .meta{padding:10px 12px 12px;font-size:13px;line-height:1.4}
+.sw .meta strong{display:block;font-size:14px}
+.sw .meta span{color:var(--muted);font-variant-numeric:tabular-nums}
+.pair{display:flex;height:72px}
+.pair>div{flex:1;display:flex;align-items:flex-end;padding:8px 10px;font-size:12px;font-weight:600}
+
+/* ===== Type ===== */
+.type{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.type .sheet h3{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+.spec-display{font-family:var(--display);font-size:56px;line-height:1;letter-spacing:-.025em;font-weight:700}
+.spec-body{font-size:17px;line-height:1.55;color:var(--ink-2)}
+.scale{display:grid;gap:10px;margin-top:20px;border-top:1px solid var(--line);padding-top:16px}
+.scale div{display:flex;align-items:baseline;gap:16px}
+.scale small{width:92px;flex:none;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+
+/* ===== Phones ===== */
+.phones{display:flex;gap:28px;overflow-x:auto;padding:8px 4px 24px;scroll-snap-type:x mandatory}
+.phone-wrap{flex:none;scroll-snap-align:start;display:grid;gap:12px}
+.phone-cap{font-size:14px;font-weight:600}
+.phone-cap span{display:block;font-weight:400;color:var(--muted);font-size:13px;max-width:330px}
+.phone{width:360px;height:740px;background:var(--paper);border-radius:36px;border:10px solid #17191C;position:relative;overflow:hidden;display:flex;flex-direction:column}
+.screen{flex:1;overflow:hidden;padding:0 20px;display:flex;flex-direction:column}
+.status-bar{height:30px;flex:none;display:flex;justify-content:space-between;align-items:center;padding:0 22px;font-size:12px;font-weight:600}
+
+/* Shared UI components */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:6px 0 10px}
+.logo{height:34px;width:auto;mix-blend-mode:multiply} /* preview only: production uses a transparent PNG */
+.logo.lg{height:56px}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-2);padding:6px 12px 6px 10px;border-radius:99px;background:var(--surface);border:1px solid var(--line)}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 0 3px var(--red-tint)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 20px;border-radius:var(--r-sm);font-weight:600;font-size:16px}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-secondary{background:var(--surface);color:var(--navy);border:1px solid var(--line-strong)}
+.btn-quiet{color:var(--navy);height:40px;padding:0 4px}
+.btn-danger{background:var(--surface);color:var(--red-t);border:1px solid #EBC3C3}
+.btn-block{width:100%}
+.btn-sm{height:36px;padding:0 12px;font-size:14px}
+.hd{font-family:var(--display);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.sub{color:var(--ink-2);font-size:15px;line-height:1.5}
+.hair{border-top:1px solid var(--line)}
+.row{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}
+.row p{font-size:15.5px;line-height:1.42;font-weight:500;color:var(--ink)}
+.row .m{display:flex;gap:10px;align-items:center;margin-top:6px;font-size:12.5px;color:var(--muted)}
+.support{flex:none;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:56px;min-height:52px;border-radius:var(--r-sm);border:1px solid var(--line-strong);background:var(--surface);font-size:11px;font-weight:600;color:var(--ink-2);gap:1px;line-height:1.1}
+.support b{font-size:16px;font-family:var(--display);color:var(--ink)}
+.support.on{background:var(--magenta-tint);border-color:var(--magenta);color:var(--magenta-t)}
+.support.on b{color:var(--magenta-t)}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:99px;line-height:1.5}
+.b-answered{background:var(--green-tint);color:var(--green-t)}
+.b-addressing{background:var(--cyan-tint);color:var(--cyan-t)}
+.b-pending{background:var(--yellow-tint);color:var(--yellow-t)}
+.b-public{background:var(--navy-tint);color:var(--navy)}
+.b-private{background:var(--sunken);color:var(--ink-2)}
+.b-hidden{background:var(--sunken);color:var(--muted);text-decoration:line-through}
+.dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.tabbar{flex:none;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding:6px 4px 18px}
+.tabbar a{display:grid;justify-items:center;gap:3px;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;padding-top:6px}
+.tabbar a.on{color:var(--navy)}
+.tabbar svg{width:22px;height:22px}
+.ways a{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.ways a:last-child{border-bottom:0}
+.ways .t{flex:1}
+.ways .t strong{display:block;font-size:16px;font-weight:600}
+.ways .t span{font-size:13.5px;color:var(--muted);line-height:1.35;display:block}
+.chev{color:var(--muted);width:18px;height:18px}
+.field{width:100%;border:1px solid var(--line-strong);background:var(--surface);border-radius:var(--r-sm);padding:14px;font-size:16px;line-height:1.5;color:var(--ink)}
+.field.focus{border-color:var(--navy);box-shadow:0 0 0 3px var(--navy-tint)}
+.search{display:flex;align-items:center;gap:10px;height:44px;border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);padding:0 12px;color:var(--muted);font-size:15px}
+.seg{display:inline-flex;background:var(--sunken);border-radius:var(--r-sm);padding:3px;gap:2px}
+.seg span{padding:6px 12px;border-radius:6px;font-size:13.5px;font-weight:600;color:var(--ink-2)}
+.seg span.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.alert{display:flex;gap:10px;padding:12px 14px;border-radius:var(--r-sm);font-size:14px;line-height:1.45}
+.alert-error{background:var(--red-tint);color:#7E1F1F}
+.alert svg{flex:none;width:18px;height:18px;margin-top:1px}
+
+/* ===== Desktop frames ===== */
+.desk{background:#17191C;border-radius:14px;padding:10px;overflow:hidden}
+.desk-inner{background:var(--paper);border-radius:6px;overflow:hidden}
+.desk-scroll{overflow-x:auto}
+.admin{display:grid;grid-template-columns:220px 1fr;min-width:1160px;height:720px}
+.side{border-right:1px solid var(--line);padding:18px 14px;display:flex;flex-direction:column;gap:4px;background:var(--surface)}
+.side .brand{display:flex;align-items:center;gap:10px;padding:0 6px 18px;border-bottom:1px solid var(--line);margin-bottom:10px}
+.side a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r-sm);font-size:14.5px;font-weight:500;color:var(--ink-2);text-decoration:none}
+.side a.on{background:var(--navy-tint);color:var(--navy);font-weight:600}
+.side a em{margin-left:auto;font-style:normal;font-size:12px;font-weight:700;color:var(--ink);background:var(--sunken);border-radius:99px;padding:1px 8px}
+.side a.on em{background:var(--navy);color:#fff}
+.main{display:flex;flex-direction:column;min-width:0}
+.abar{display:flex;align-items:center;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line)}
+.abar h3{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.01em;margin-right:auto}
+.atabs{display:flex;gap:22px;padding:0 24px;border-bottom:1px solid var(--line);font-size:14px;font-weight:600;color:var(--muted)}
+.atabs span{padding:12px 0;border-bottom:2px solid transparent}
+.atabs span.on{color:var(--ink);border-color:var(--navy)}
+.atabs em{font-style:normal;font-weight:700;color:var(--ink-2);margin-left:4px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) 440px;flex:1;min-height:0}
+.list{border-right:1px solid var(--line);overflow:hidden}
+.filters{display:flex;gap:10px;padding:12px 24px;border-bottom:1px solid var(--line);align-items:center}
+.filters .search{flex:1;height:38px;font-size:14px}
+.sel{height:38px;display:inline-flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--r-sm);font-size:13.5px;font-weight:500;background:var(--surface)}
+.qrow{display:grid;grid-template-columns:20px 1fr auto;gap:12px;padding:14px 24px;border-bottom:1px solid var(--line);align-items:start;font-size:14.5px}
+.qrow.on{background:var(--navy-tint);box-shadow:inset 3px 0 0 var(--navy)}
+.qrow p{font-weight:500;line-height:1.4}
+.qrow .m{margin-top:6px;display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted)}
+.qrow .n{font-family:var(--display);font-weight:700;font-size:15px;text-align:right}
+.qrow .n small{display:block;font-family:var(--body);font-weight:500;font-size:11px;color:var(--muted)}
+.cb{width:16px;height:16px;border:1.5px solid var(--line-strong);border-radius:4px;margin-top:3px;background:var(--surface)}
+.detail{padding:22px 24px;display:flex;flex-direction:column;gap:18px;overflow:hidden;background:var(--surface)}
+.detail .q{font-family:var(--display);font-size:22px;line-height:1.25;font-weight:600;letter-spacing:-.01em}
+.kv{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.kv b{color:var(--ink);font-weight:600}
+.ctl h4{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.ctl .seg{display:flex}
+.ctl .seg span{flex:1;text-align:center}
+.ctx{border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-size:14px;display:grid;gap:8px}
+.kbd{font-size:11px;font-weight:600;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--ink-2);background:var(--surface)}
+
+/* Presentation */
+.present-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.stage{aspect-ratio:16/9;background:var(--paper);border-radius:6px;position:relative;overflow:hidden;container-type:inline-size}
+.stage .in{position:absolute;inset:0;padding:5cqw 6cqw;display:flex;flex-direction:column}
+.stage .logo{height:6cqw;mix-blend-mode:multiply}
+
+@media (max-width:820px){
+  .type,.present-grid{grid-template-columns:1fr}
+  .spec-display{font-size:42px}
+}
+</style>
+</head>
+<body>
+<div class="board">
+
+<header>
+  <span class="eyebrow">Connect-Ask · Phase B · Design direction for review</span>
+  <h1>Many colours, one point of focus.</h1>
+  <p>The Covenant Connect logo is six rays converging on a single word. Connect-Ask works the same way: many people, many kinds of participation, all meeting at one clear place. The design uses that idea structurally, through colour roles and composition, rather than by repeating the rays as decoration.</p>
+  <p class="note">This is a static review board, not the app. The mockups use the real <b>logo.png</b>. For preview, the empty margin is trimmed in the browser and the off-white background is hidden with a CSS blend. The app will use a properly transparent file, pending your approval.</p>
+</header>
+
+<!-- ============ 1. CONCEPT ============ -->
+<section class="part">
+  <h2><span class="num">1</span> Direction</h2>
+  <p class="lede">Warm, editorial, youthful but composed. It should feel like a well-made church bulletin that became an app: confident type, generous space, quiet surfaces, and one brand colour speaking at a time.</p>
+  <div class="sheet" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px">
+    <div><span class="label"><span class="tick" style="--c:var(--navy)"></span>One ray, one meaning</span><p class="note" style="margin-top:8px">Each participation type owns one logo colour. The colour appears as a small <b>ray tick</b> (a single logo ray pointing at its label) and in that section's states. Only the homepage shows several at once, echoing the logo.</p></div>
+    <div><span class="label"><span class="tick" style="--c:var(--red)"></span>Navy does the work</span><p class="note" style="margin-top:8px">Navy is the only brand colour dark enough for text and buttons (9.7:1). It carries every primary action, link and focus ring. The bright rays never carry text, which keeps everything readable.</p></div>
+    <div><span class="label"><span class="tick" style="--c:var(--green)"></span>Lists, not card piles</span><p class="note" style="margin-top:8px">Questions and testimonies are typographic lists separated by hairlines. Surfaces stay flat, with 8–12px corners and almost no shadows. Hierarchy comes from type size, weight and spacing.</p></div>
+  </div>
+</section>
+
+<!-- ============ 2. PALETTE ============ -->
+<section class="part">
+  <h2><span class="num">2</span> Colour</h2>
+  <p class="lede">Sampled directly from logo.png. Each bright ray gets a darker <b>text</b> variant that passes WCAG AA (≥4.5:1) and a pale <b>tint</b> for backgrounds. Ratios are measured against the paper colour.</p>
+
+  <div class="swatches" style="margin-bottom:14px">
+    <div class="sw"><div class="chip" style="background:var(--paper);border-bottom:1px solid var(--line)">Paper</div><div class="meta"><strong>#FBFAF7</strong><span>App background (warm, not stark)</span></div></div>
+    <div class="sw"><div class="chip" style="background:var(--surface);border-bottom:1px solid var(--line)">Surface</div><div class="meta"><strong>#FFFFFF</strong><span>Inputs, panels</span></div></div>
+    <div class="sw"><div class="chip" style="background:var(--sunken)">Sunken</div><div class="meta"><strong>#F3F1EC</strong><span>Segmented controls, wells</span></div></div>
+    <div class="sw"><div class="chip" style="background:var(--line)">Line</div><div class="meta"><strong>#E6E2DA</strong><span>Hairlines, dividers</span></div></div>
+    <div class="sw"><div class="chip" style="background:var(--ink);color:#fff">Ink</div><div class="meta"><strong>#1D1F22</strong><span>Text · 15.8:1</span></div></div>
+    <div class="sw"><div class="chip" style="background:var(--muted);color:#fff">Muted</div><div class="meta"><strong>#5F6368</strong><span>Secondary text · 5.8:1 (the “connect” grey)</span></div></div>
+  </div>
+
+  <div class="swatches">
+    <div class="sw"><div class="pair"><div style="background:var(--navy);color:#fff">#1A436E</div><div style="background:var(--navy-tint);color:var(--navy)">tint</div></div><div class="meta"><strong>Navy: actions &amp; Questions</strong><span>9.7:1 as-is. Buttons, links, focus, selection.</span></div></div>
+    <div class="sw"><div class="pair"><div style="background:var(--cyan);color:var(--ink)">#4CA3DB</div><div style="background:var(--cyan-t);color:#fff">#1C6698</div></div><div class="meta"><strong>Cyan: Context</strong><span>Ray 2.7:1 · text 5.9:1. Also “Being addressed”.</span></div></div>
+    <div class="sw"><div class="pair"><div style="background:var(--green);color:var(--ink)">#4EA869</div><div style="background:var(--green-t);color:#fff">#2D7A47</div></div><div class="meta"><strong>Green: Prayer</strong><span>Ray 2.8:1 · text 5.1:1. Also “Answered”.</span></div></div>
+    <div class="sw"><div class="pair"><div style="background:var(--yellow);color:var(--ink)">#F7DB58</div><div style="background:var(--yellow-t);color:#fff">#8A6A00</div></div><div class="meta"><strong>Yellow: Thanksgiving</strong><span>Ray 1.3:1 (fill only) · text 4.9:1. Also “Pending review”.</span></div></div>
+    <div class="sw"><div class="pair"><div style="background:var(--magenta);color:#fff">#D63F9B</div><div style="background:var(--magenta-t);color:#fff">#A62B78</div></div><div class="meta"><strong>Magenta: “Me too”</strong><span>Text 6.2:1. The support interaction only.</span></div></div>
+    <div class="sw"><div class="pair"><div style="background:var(--red);color:#fff">#D93C3C</div><div style="background:var(--red-t);color:#fff">#B42F2F</div></div><div class="meta"><strong>Red: Live &amp; errors</strong><span>Live dot (an on-air convention), destructive actions, errors.</span></div></div>
+  </div>
+  <p class="note" style="margin-top:14px">Rule: a bright ray colour is never the only way meaning is shown. It always appears next to a text label or icon, so colour-blind members lose nothing.</p>
+</section>
+
+<!-- ============ 3. TYPE ============ -->
+<section class="part">
+  <h2><span class="num">3</span> Typography</h2>
+  <p class="lede">Two families, both self-hosted through <code>next/font</code>, so there are no runtime requests to Google and no layout shift on slow church Wi-Fi.</p>
+  <div class="type">
+    <div class="sheet">
+      <h3>Display · Bricolage Grotesque</h3>
+      <div class="spec-display">Ask what you’ve been wondering.</div>
+      <p class="note" style="margin-top:16px">It has character, and its slightly quirky grotesque forms feel young and human without being childish. Optical sizing keeps it crisp from phone headings to projector scale. It sits well beside the logo’s geometric wordmark without imitating it.</p>
+    </div>
+    <div class="sheet">
+      <h3>Text &amp; UI · Figtree</h3>
+      <p class="spec-body">If God already knows what I’m going to pray, why should I still pray? Figtree is friendly and geometric, with open letterforms that stay legible at small sizes on cheaper Android screens and for older members.</p>
+      <div class="scale">
+        <div><small>Display 40/44</small><span class="hd" style="font-size:40px">Questions</span></div>
+        <div><small>Title 24/30</small><span class="hd" style="font-size:24px;font-weight:600">From today’s service</span></div>
+        <div><small>Body 17/26</small><span style="font-size:17px">Question text and form input</span></div>
+        <div><small>UI 15/22</small><span style="font-size:15px;font-weight:600">Send question</span></div>
+        <div><small>Meta 13/18</small><span style="font-size:13px;color:var(--muted)">12 min ago · 2 context notes</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:14px">Minimum 16px for any input (this also stops iOS zooming into fields). Body copy at 16–17px. Line length is capped at about 65 characters on desktop.</p>
+</section>
+
+<!-- ============ 4. MOBILE SCREENS ============ -->
+<section class="part">
+  <h2><span class="num">4</span> Mobile: the core journey</h2>
+  <p class="lede">Scan → Explore → Participate → Connect. Shown at 360px. Scroll sideways to see all five screens.</p>
+
+  <div class="phones">
+
+    <!-- HOME -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="status-bar"><span>10:42</span><span>●●● 5G</span></div>
+        <div class="screen">
+          <div class="topbar" style="padding-top:12px"><img class="logo" style="height:44px" src="../logo.png" alt="Covenant Connect"><span class="live"><i></i>Live</span></div>
+          <div style="padding:18px 0 6px">
+            <span class="label" style="font-size:12px"><span class="tick" style="--c:var(--red)"></span>Sunday Service · 25 Oct</span>
+            <h2 class="hd" style="font-size:36px;margin:10px 0 10px">Ask what you’ve been wondering.</h2>
+            <p class="sub">Send an anonymous question about today’s message, add a prayer request, or share what God has done. No account needed.</p>
+          </div>
+          <div style="display:grid;gap:10px;margin:18px 0 22px">
+            <a class="btn btn-primary btn-block">Ask a question</a>
+            <a class="btn btn-secondary btn-block">Explore 18 questions</a>
+          </div>
+          <span class="label" style="font-size:12px"><span class="tick" style="--c:var(--navy)"></span>Being asked today</span>
+          <div class="row" style="padding-top:10px"><div style="flex:1"><p>If God already knows what I’m going to pray, why should I still pray?</p><div class="m"><span>14 have this too</span></div></div></div>
+          <div class="ways" style="margin-top:14px">
+            <a><span class="tick" style="--c:var(--cyan)"></span><span class="t"><strong>Add context</strong><span>An insight or clarification</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+            <a><span class="tick" style="--c:var(--green)"></span><span class="t"><strong>Prayer request</strong><span>Private to church leaders</span></span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+        <nav class="tabbar">
+          <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12Z"/><path d="M10 9.5a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6.9v.4M12 15.5h.01"/></svg>Questions</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/></svg>Prayer</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="4"/><path d="M12 3v3M4.9 6.6l2 2M19.1 6.6l-2 2M2 13h3M19 13h3M3 21h18"/></svg>Testimonies</a>
+        </nav>
+      </div>
+      <div class="phone-cap">Home<span>The logo leads. One clear primary action. A live preview of approved questions. The secondary actions are a quiet list, not five equal cards.</span></div>
+    </div>
+
+    <!-- BOARD -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="status-bar"><span>10:43</span><span>●●● 5G</span></div>
+        <div class="screen">
+          <div class="topbar" style="padding-bottom:4px"><img class="logo" style="height:28px" src="../logo.png" alt="Covenant Connect"><a class="btn btn-primary btn-sm">Ask</a></div>
+          <h2 class="hd" style="font-size:32px;margin:10px 0 4px">Questions</h2>
+          <div class="seg" style="margin:8px 0 12px"><span class="on">Today’s service</span><span>Earlier</span></div>
+          <div class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search questions</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0 2px;font-size:13.5px">
+            <div class="seg"><span class="on">All</span><span>Unanswered</span><span>Answered</span></div>
+            <span style="font-weight:600;color:var(--navy);white-space:nowrap">Most shared ▾</span>
+          </div>
+          <div class="row"><div style="flex:1"><p>If God already knows what I’m going to pray, why should I still pray?</p><div class="m"><span class="badge b-answered">✓ Answered</span><span>2 context notes</span></div></div><button class="support" aria-label="I have this question too, 14 people"><b>14</b>Me too</button></div>
+          <div class="row"><div style="flex:1"><p>How do I know whether a decision is God’s will or just what I want?</p><div class="m"><span class="badge b-addressing"><span class="dot"></span>Being addressed</span></div></div><button class="support on" aria-pressed="true"><b>9</b>You too</button></div>
+          <div class="row"><div style="flex:1"><p>Is it wrong to have doubts while serving in church?</p><div class="m"><span>8 min ago</span></div></div><button class="support"><b>6</b>Me too</button></div>
+          <div class="row" style="border:0"><div style="flex:1"><p>What does it practically mean to “renew your mind” on a normal weekday?</p><div class="m"><span>15 min ago</span></div></div><button class="support"><b>3</b>Me too</button></div>
+        </div>
+        <nav class="tabbar">
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+          <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12Z"/><path d="M10 9.5a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6.9v.4M12 15.5h.01"/></svg>Questions</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/></svg>Prayer</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="4"/><path d="M12 3v3M4.9 6.6l2 2M19.1 6.6l-2 2M2 13h3M19 13h3M3 21h18"/></svg>Testimonies</a>
+        </nav>
+      </div>
+      <div class="phone-cap">Question Board<span>A list, not cards. “Me too” is a 52px tap target with its count. Once tapped it reads “You too”, in magenta, the only place that colour appears. There are no downvotes.</span></div>
+    </div>
+
+    <!-- ASK -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="status-bar"><span>10:44</span><span>●●● 5G</span></div>
+        <div class="screen">
+          <div class="topbar"><a class="btn-quiet" style="display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:15px">‹ Back</a><img class="logo" style="height:26px" src="../logo.png" alt="Covenant Connect"></div>
+          <span class="label" style="margin-top:14px"><span class="tick" style="--c:var(--navy)"></span>Anonymous question</span>
+          <h2 class="hd" style="font-size:32px;margin:8px 0 8px">Ask a question</h2>
+          <p class="sub" style="font-size:14.5px">We never ask for your name. Church leaders read every question, and some are shared on the Question Board.</p>
+          <div class="live" style="margin:16px 0 12px;align-self:flex-start;font-size:12.5px"><i></i>For Sunday Service · 25 Oct</div>
+          <label style="font-size:14px;font-weight:600;margin-bottom:6px" for="q">Your question</label>
+          <div class="field focus" id="q" style="height:150px">How do I forgive someone who hasn’t said sorry, when I still see them at church every week?<span style="display:inline-block;width:2px;height:18px;background:var(--navy);vertical-align:-3px"></span></div>
+          <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin:6px 0 14px"><span>Please don’t include names of others.</span><span style="font-variant-numeric:tabular-nums">92 / 1000</span></div>
+          <div class="alert alert-error" role="alert"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4.5M12 16h.01"/></svg><span><b>Not sent yet.</b> The connection dropped. Your question is still here, so you can try again.</span></div>
+          <div style="margin-top:auto;padding:14px 0 22px"><a class="btn btn-primary btn-block">Try sending again</a></div>
+        </div>
+      </div>
+      <div class="phone-cap">Ask: error state<span>The form is a focused task, so the tab bar is hidden and the submit button stays pinned within thumb reach. On failure the text stays put and the button re-enables. A retry reuses the same submission ID, so it can’t create a duplicate.</span></div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="status-bar"><span>10:44</span><span>●●● 5G</span></div>
+        <div class="screen">
+          <div class="topbar"><span></span><img class="logo" style="height:26px" src="../logo.png" alt="Covenant Connect"></div>
+          <div style="margin-top:84px">
+            <div style="display:flex;gap:5px;margin-bottom:22px" aria-hidden="true"><span class="tick" style="--c:var(--green);width:26px;height:10px"></span><span class="tick" style="--c:var(--navy);width:26px;height:10px"></span><span class="tick" style="--c:var(--yellow);width:26px;height:10px"></span></div>
+            <h2 class="hd" style="font-size:34px;margin-bottom:12px">Your question was received.</h2>
+            <p class="sub">Church leaders will review it. If it’s shared on the Question Board, others can say they have it too.</p>
+            <p class="sub" style="margin-top:12px;font-size:14px;color:var(--muted)">This message only appears after your question has been saved.</p>
+          </div>
+          <div style="margin-top:auto;display:grid;gap:10px;padding:0 0 22px">
+            <a class="btn btn-primary btn-block">Explore questions</a>
+            <a class="btn btn-secondary btn-block">Ask another</a>
+          </div>
+        </div>
+      </div>
+      <div class="phone-cap">Confirmation<span>It is honest about what happens next and never promises publication. The three small rays are the only flourish, and they respect reduced-motion settings.</span></div>
+    </div>
+
+    <!-- TESTIMONIES -->
+    <div class="phone-wrap">
+      <div class="phone"><div class="status-bar"><span>10:50</span><span>●●● 5G</span></div>
+        <div class="screen">
+          <div class="topbar"><img class="logo" style="height:28px" src="../logo.png" alt="Covenant Connect"></div>
+          <span class="label" style="margin-top:12px"><span class="tick" style="--c:var(--yellow)"></span>Thanksgiving &amp; testimonies</span>
+          <h2 class="hd" style="font-size:32px;margin:8px 0 14px">What God has done</h2>
+          <a class="btn btn-secondary btn-block" style="height:46px">Share yours</a>
+          <article style="padding:20px 0;border-bottom:1px solid var(--line)">
+            <p style="font-family:var(--display);font-size:21px;line-height:1.3;font-weight:500;letter-spacing:-.01em">“After eight months of applications I finally got the job offer this week. I’d nearly stopped believing it would happen.”</p>
+            <p style="margin-top:10px;font-size:13px;color:var(--muted)"><span class="badge b-pending" style="margin-right:6px">Testimony</span>Tolu · 2 days ago</p>
+          </article>
+          <article style="padding:20px 0">
+            <p style="font-size:16px;line-height:1.5">Thankful for my mum’s successful surgery and for everyone who prayed with our family.</p>
+            <p style="margin-top:10px;font-size:13px;color:var(--muted)"><span class="badge b-private" style="margin-right:6px">Thanksgiving</span>Anonymous · 5 days ago</p>
+          </article>
+        </div>
+        <nav class="tabbar">
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.4A8.5 8.5 0 1 1 21 12Z"/><path d="M10 9.5a2 2 0 1 1 2.6 1.9c-.4.2-.6.5-.6.9v.4M12 15.5h.01"/></svg>Questions</a>
+          <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z"/></svg>Prayer</a>
+          <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="4"/><path d="M12 3v3M4.9 6.6l2 2M19.1 6.6l-2 2M2 13h3M19 13h3M3 21h18"/></svg>Testimonies</a>
+        </nav>
+      </div>
+      <div class="phone-cap">Testimonies<span>Editorial pull-quotes in the display face, with no likes or counts. Only items with the member’s consent and a leader’s approval appear. The display name is optional.</span></div>
+    </div>
+  </div>
+
+  <div class="sheet" style="margin-top:8px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px">
+    <div><span class="label"><span class="tick"></span>Mobile navigation</span><p class="note" style="margin-top:8px">A bottom tab bar with four labelled destinations: <b>Home · Questions · Prayer · Testimonies</b>. It sits in thumb reach, and every label is visible, never icon-only. Focused forms hide the bar to make room for the pinned submit button. On desktop the same four items become a top bar, with an “Ask a question” button on the right.</p></div>
+    <div><span class="label"><span class="tick" style="--c:var(--cyan)"></span>Add Context</span><p class="note" style="margin-top:8px">It isn’t a tab, so the bar stays at four items. You reach it from the homepage list and from an “Add context to this question” button on each question’s page, which links your note to that exact question.</p></div>
+    <div><span class="label"><span class="tick" style="--c:var(--green)"></span>Prayer</span><p class="note" style="margin-top:8px">It uses the same form pattern as Ask, with a green tick and a privacy statement above the field: “Only church leaders can read this. It is never shown publicly.” There are no name, email or phone fields.</p></div>
+  </div>
+</section>
+
+<!-- ============ 5. ADMIN ============ -->
+<section class="part">
+  <h2><span class="num">5</span> Admin: moderation workspace</h2>
+  <p class="lede">The admin side is built for speed during a live service. It has an inbox-style split view, keyboard shortcuts, and filters kept in the URL so auto-refresh never resets them. <b>Board visibility</b> and <b>Answer status</b> are two separate controls, because they are separate concepts.</p>
+  <div class="desk"><div class="desk-inner desk-scroll">
+    <div class="admin">
+      <aside class="side">
+        <div class="brand"><img class="logo" style="height:30px" src="../logo.png" alt="Covenant Connect"></div>
+        <a>Overview</a>
+        <a class="on">Questions <em>12</em></a>
+        <a>Context <em>4</em></a>
+        <a>Prayer <em>7</em></a>
+        <a>Testimonies <em>3</em></a>
+        <a>Services</a>
+        <a>QR &amp; Present</a>
+        <div style="margin-top:auto;font-size:12.5px;color:var(--muted);padding:10px">Signed in as Pastor’s office<br><span style="color:var(--navy);font-weight:600">Sign out</span></div>
+      </aside>
+      <div class="main">
+        <div class="abar"><h3>Questions</h3><span class="live"><i></i>Sunday Service · Live</span><a class="btn btn-secondary btn-sm">Open presenter</a></div>
+        <div class="atabs"><span class="on">Needs review<em>12</em></span><span>Public<em>18</em></span><span>Private<em>5</em></span><span>Hidden<em>2</em></span><span>Archived</span></div>
+        <div class="split">
+          <div class="list">
+            <div class="filters"><div class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</div><span class="sel">This service ▾</span><span class="sel">Any answer status ▾</span><span class="sel">Newest ▾</span></div>
+            <div class="qrow on"><span class="cb"></span><div><p>How do I forgive someone who hasn’t said sorry, when I still see them at church every week?</p><div class="m"><span class="badge b-pending">Pending review</span><span>2 min ago</span></div></div><div class="n">0<small>support</small></div></div>
+            <div class="qrow"><span class="cb"></span><div><p>Can you explain what was meant by “the covenant is the foundation”?</p><div class="m"><span class="badge b-pending">Pending review</span><span>4 min ago · 1 context</span></div></div><div class="n">0<small>support</small></div></div>
+            <div class="qrow"><span class="cb"></span><div><p>Why do bad things happen to people who are faithful?</p><div class="m"><span class="badge b-pending">Pending review</span><span>9 min ago</span></div></div><div class="n">0<small>support</small></div></div>
+            <div class="qrow"><span class="cb"></span><div><p>Is it okay to date someone who doesn’t go to church?</p><div class="m"><span class="badge b-pending">Pending review</span><span>11 min ago</span></div></div><div class="n">0<small>support</small></div></div>
+          </div>
+          <div class="detail">
+            <div class="kv"><span>Submitted <b>10:44</b></span><span>Service <b>Sunday Service</b></span><span>Support <b>0</b></span></div>
+            <p class="q">How do I forgive someone who hasn’t said sorry, when I still see them at church every week?</p>
+            <div class="ctl"><h4>Board visibility</h4><div class="seg"><span class="on">Pending</span><span>Public</span><span>Private</span><span>Hidden</span></div></div>
+            <div class="ctl"><h4>Answer status</h4><div class="seg"><span class="on">Open</span><span>Being addressed</span><span>Answered</span></div></div>
+            <div style="display:flex;gap:10px"><a class="btn btn-primary btn-sm" style="flex:1">Approve for board <span class="kbd" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.4)">A</span></a><a class="btn btn-secondary btn-sm">Show on screen</a></div>
+            <div class="ctl"><h4>Linked context (0)</h4><p class="note">No context has been added to this question yet.</p></div>
+            <div style="margin-top:auto;display:flex;gap:10px;border-top:1px solid var(--line);padding-top:14px"><a class="btn btn-secondary btn-sm">Archive</a><a class="btn btn-danger btn-sm">Delete…</a><span style="margin-left:auto;font-size:12px;color:var(--muted);align-self:center"><span class="kbd">J</span> <span class="kbd">K</span> next / prev</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <p class="note" style="margin-top:14px">The <b>Overview</b> page uses the same shell. It shows a row of “needs attention” counts, a live-service panel with Activate/Close, QR and Presenter shortcuts, and a short recent-activity log. There are no charts. On mobile the split view collapses to list → detail, and the sidebar becomes a menu sheet.</p>
+</section>
+
+<!-- ============ 6. PRESENTATION ============ -->
+<section class="part">
+  <h2><span class="num">6</span> Projector screens</h2>
+  <p class="lede">Light backgrounds on purpose. The official logo has a dark wordmark that would vanish on a dark screen, and we won’t alter it. Light slides also project well in lit auditoriums. If the church has a reversed (white) logo, a dark LED theme can be added later.</p>
+  <div class="present-grid">
+    <div class="desk"><div class="stage"><div class="in" style="align-items:center;text-align:center;justify-content:space-between">
+      <img class="logo" src="../logo.png" alt="Covenant Connect">
+      <div style="display:flex;align-items:center;gap:5cqw">
+        <div style="text-align:left;max-width:38cqw"><p class="hd" style="font-size:5.4cqw">Ask a question.<br>Share a prayer.</p><p style="font-size:1.9cqw;color:var(--ink-2);margin-top:1.5cqw">Point your phone camera here. Anonymous. No app or account needed.</p></div>
+        <svg viewBox="0 0 29 29" style="width:30cqw;background:#fff;padding:2.2cqw;border-radius:1cqw;border:1px solid var(--line)" shape-rendering="crispEdges" id="fakeqr" aria-label="QR code placeholder"></svg>
+      </div>
+      <p style="font-family:var(--display);font-weight:600;font-size:2.4cqw;letter-spacing:.01em">ask.example.org</p>
+    </div></div><p class="phone-cap" style="margin-top:12px;color:#fff;background:transparent"> </p></div>
+    <div class="desk"><div class="stage"><div class="in">
+      <div style="display:flex;justify-content:space-between;align-items:center"><img class="logo" style="height:4.4cqw" src="../logo.png" alt="Covenant Connect"><span class="label" style="font-size:1.6cqw"><span class="tick" style="width:2.4cqw;height:1cqw"></span>Live Q&amp;A</span></div>
+      <p class="hd" style="font-size:5cqw;line-height:1.12;margin-top:auto;max-width:80cqw">“If God already knows what I’m going to pray, why should I still pray?”</p>
+      <div style="display:flex;gap:3cqw;margin-top:3cqw;font-size:1.8cqw;color:var(--ink-2);border-top:1px solid var(--line);padding-top:2cqw"><span><b style="color:var(--magenta-t)">14</b> people have this question too</span><span style="margin-left:auto">Scan the code to ask yours</span></div>
+    </div></div></div>
+  </div>
+  <p class="note" style="margin-top:14px">The QR screen will be generated as a real SVG from the configured production URL, with a 4-module quiet zone and error-correction level M. It also offers <b>SVG/PNG downloads</b> so the media team can put the same permanent code into service slides. The presenter only shows a question a leader explicitly put on screen. It never queries prayer or testimony data at all.</p>
+</section>
+
+<!-- ============ 7. COMPONENT STATES ============ -->
+<section class="part">
+  <h2><span class="num">7</span> Status language</h2>
+  <p class="lede">Members only ever see answer status. Leaders see both, and the two never share a control.</p>
+  <div class="sheet" style="display:grid;gap:18px">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span class="label" style="width:150px">Board visibility</span><span class="badge b-pending">Pending review</span><span class="badge b-public">Public</span><span class="badge b-private">🔒 Private</span><span class="badge b-hidden">Hidden</span><span class="badge b-private">Archived</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span class="label" style="width:150px">Answer status</span><span class="badge b-private">Open</span><span class="badge b-addressing"><span class="dot"></span>Being addressed</span><span class="badge b-answered">✓ Answered</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><span class="label" style="width:150px">Buttons</span><a class="btn btn-primary btn-sm">Primary</a><a class="btn btn-secondary btn-sm">Secondary</a><a class="btn btn-danger btn-sm">Delete…</a><button class="support"><b>6</b>Me too</button><button class="support on"><b>7</b>You too</button></div>
+  </div>
+</section>
+
+</div>
+<script>
+// Preview the logo as it will ship: empty canvas margin trimmed (artwork bounds 156,73 → 1566,757 of 1816×916).
+addEventListener('load',()=>{for(const img of document.querySelectorAll('img.logo')){const h=img.getBoundingClientRect().height;if(!h)continue;const w=document.createElement('span');
+w.style.cssText=`display:inline-block;flex:none;overflow:hidden;height:${h}px;aspect-ratio:1411/685`;const H=h*916/685;img.style.cssText+=`;height:${H}px;width:auto;max-width:none;margin-left:${-h*156/685}px;margin-top:${-h*73/685}px`;img.replaceWith(w);w.appendChild(img)}});
+// Decorative QR placeholder for the mockup only (not a scannable code).
+(function(){const s=document.getElementById('fakeqr');if(!s)return;const n=29;let seed=7;const r=()=>(seed=(seed*9301+49297)%233280)/233280;let h='';
+const finder=(x,y)=>{h+=`<rect x="${x}" y="${y}" width="7" height="7" fill="#1D1F22"/><rect x="${x+1}" y="${y+1}" width="5" height="5" fill="#fff"/><rect x="${x+2}" y="${y+2}" width="3" height="3" fill="#1D1F22"/>`};
+const inF=(x,y)=>(x<8&&y<8)||(x>n-9&&y<8)||(x<8&&y>n-9);
+for(let y=0;y<n;y++)for(let x=0;x<n;x++)if(!inF(x,y)&&r()>.52)h+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#1D1F22"/>`;
+finder(0,0);finder(n-7,0);finder(0,n-7);s.innerHTML=h;})();
+</script>
+</body>
+</html>
