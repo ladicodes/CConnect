@@ -4,9 +4,9 @@ import { useActionState } from "react";
 import { signIn, type SignInState } from "@/app/admin/actions";
 import { AlertIcon } from "@/components/icons";
 
-export function LoginForm({ notice }: { notice?: string }) {
+export function LoginForm() {
   const [state, action, pending] = useActionState<SignInState, FormData>(signIn, {});
-  const error = state.error ?? notice;
+  const error = state.error;
   return (
     <form action={action} className="space-y-5" noValidate>
       {error && (

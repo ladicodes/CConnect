@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { authService } from "@/lib/env";
 
 /**
  * Keeps staff sessions fresh and sends signed-out visitors to the login page.
@@ -7,10 +8,11 @@ import { NextResponse, type NextRequest } from "next/server";
  * the session and staff role again, and the database enforces roles itself.
  */
 export async function proxy(request: NextRequest) {
-  const url = process.env.SUPABASE_URL?.trim();
-  const key = (process.env.SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_ANON_KEY)?.trim();
   const isLogin = request.nextUrl.pathname === "/admin/login";
-  if (!url || !key) return NextResponse.next();
+  // Same rule as the rest of the app: no local or non-HTTPS auth in production.
+  const service = authService();
+  if (!service.ok) return NextResponse.next();
+  const { url, key } = service;
 
   let response = NextResponse.next({ request });
   const supabase = createServerClient(url, key, {

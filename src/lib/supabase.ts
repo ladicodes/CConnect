@@ -2,11 +2,8 @@ import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
-import { supabaseKey } from "@/lib/env";
-
-export function supabaseConfigured(): boolean {
-  return Boolean(process.env.SUPABASE_URL?.trim() && supabaseKey());
-}
+import { authService } from "@/lib/env";
+import { logEvent } from "@/lib/log";
 
 /** Supabase client bound to the current request's cookies (staff auth only). */
 export async function createSupabaseServerClient() {
@@ -15,8 +12,12 @@ export async function createSupabaseServerClient() {
   // prefetch render, where Next.js aborts network requests.
   await connection();
   const cookieStore = await cookies();
-  if (!supabaseConfigured()) return null;
-  return createServerClient(process.env.SUPABASE_URL!.trim(), supabaseKey(), {
+  const service = authService();
+  if (!service.ok) {
+    logEvent("error", "AUTH_SERVICE_REFUSED", { problem: service.problem });
+    return null;
+  }
+  return createServerClient(service.url, service.key, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

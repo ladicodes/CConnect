@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { getStaff } from "@/lib/auth";
 import { LoginForm } from "@/components/admin/login-form";
 import { Logo } from "@/components/logo";
+import { AlertIcon } from "@/components/icons";
 
 export const metadata: Metadata = { title: "Leaders sign in" };
 
@@ -31,9 +32,12 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
           <p className="mb-6 mt-2 text-[0.9375rem] text-ink-2">
             Access is by invitation from an administrator. There is no public sign-up.
           </p>
-          <Suspense fallback={<LoginForm />}>
-            <LoginWithNotice searchParams={searchParams} />
+          {/* The form is rendered once and never swapped out, so nothing typed
+              into it can be lost while the rest of the page loads. */}
+          <Suspense fallback={null}>
+            <LoginNotice searchParams={searchParams} />
           </Suspense>
+          <LoginForm />
         </div>
         <p className="mt-6 text-center text-sm text-muted">
           <Link href="/" className="font-semibold text-navy hover:underline">
@@ -45,11 +49,17 @@ export default function LoginPage({ searchParams }: { searchParams: SearchParams
   );
 }
 
-async function LoginWithNotice({ searchParams }: { searchParams: SearchParams }) {
+async function LoginNotice({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams;
   const lookup = await getStaff();
   if (lookup.status === "staff") redirect("/admin");
   const key = Array.isArray(params.error) ? params.error[0] : params.error;
   const notice = key ? NOTICES[key] : undefined;
-  return <LoginForm notice={notice} />;
+  if (!notice) return null;
+  return (
+    <div role="alert" className="alert alert-error mb-5">
+      <AlertIcon />
+      <p>{notice}</p>
+    </div>
+  );
 }

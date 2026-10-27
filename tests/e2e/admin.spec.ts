@@ -24,6 +24,16 @@ test("a wrong password is refused with a clear message", async ({ page }) => {
   await expect(page).toHaveURL(/\/admin\/login/);
 });
 
+test("typing into the sign-in form straight away is never lost while the page finishes loading", async ({ page }) => {
+  await page.goto("/admin/login", { waitUntil: "commit" });
+  await page.getByLabel("Email").fill("admin@connect-ask.local");
+  await page.getByLabel("Password").fill("local-admin-password");
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByLabel("Email")).toHaveValue("admin@connect-ask.local");
+  await page.getByRole("button", { name: "Sign in" }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+});
+
 test("moderation: approve, answer, hide, with the public board following each change", async ({ page, context }) => {
   const text = unique("Can someone explain the parable of the talents?");
   const visitor = await context.browser()!.newPage();

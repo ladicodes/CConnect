@@ -15,7 +15,8 @@
     "db:migrate": "node --env-file-if-exists=.env.local scripts/db/migrate.mjs",
     "staff": "node --env-file-if-exists=.env.local scripts/staff.mjs",
     "brand:logo": "node scripts/brand/make-transparent-logo.mjs logo.png public/brand/covenant-connect-logo-transparent.png",
-    "dev:next": "next dev"
+    "dev:next": "next dev",
+    "dev:supabase": "node scripts/dev.mjs --supabase"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

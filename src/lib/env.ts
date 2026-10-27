@@ -117,6 +117,30 @@ export function configChecks(stage: DeploymentStage = deploymentStage()): Config
   return checks;
 }
 
+export type AuthServiceResult = { ok: true; url: string; key: string } | { ok: false; problem: string };
+
+/**
+ * The Supabase Auth address to use. In production this only ever accepts a
+ * real HTTPS address that is not local or private, so a development stand-in
+ * (like the one `npm run dev:local` starts on 127.0.0.1) can never be used to
+ * sign in to a deployed site, even if it were misconfigured.
+ */
+export function authService(stage: DeploymentStage = deploymentStage()): AuthServiceResult {
+  const raw = read("SUPABASE_URL");
+  const key = supabaseKey();
+  if (!raw || !key) return { ok: false, problem: "SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY must both be set." };
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return { ok: false, problem: "SUPABASE_URL is not a valid address." };
+  }
+  if (stage === "production" && (parsed.protocol !== "https:" || isLocalHostname(parsed.hostname))) {
+    return { ok: false, problem: "In production, SUPABASE_URL must be the HTTPS address of a real Supabase project." };
+  }
+  return { ok: true, url: parsed.origin, key };
+}
+
 export function supabaseKey(): string {
   return read("SUPABASE_PUBLISHABLE_KEY") || read("SUPABASE_ANON_KEY");
 }

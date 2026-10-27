@@ -36,6 +36,10 @@ function verify(token) {
  * @param {{ port: number, users: { id: string, email: string, password: string }[] }} options
  */
 export function startMockAuth({ port, users }) {
+  // Never on a deployment: this stand-in exists only for local development and tests.
+  if (process.env.VERCEL || process.env.VERCEL_ENV || process.env.APP_ENV === "production") {
+    throw new Error("The local stand-in sign-in service must never run on a deployment.");
+  }
   const byEmail = new Map(users.map((user) => [user.email.toLowerCase(), user]));
   const byId = new Map(users.map((user) => [user.id, user]));
   const refreshTokens = new Map();
